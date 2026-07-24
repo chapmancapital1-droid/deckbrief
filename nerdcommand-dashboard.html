@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NerdCommand OS — Command Center</title>
+<style>
+  :root {
+    --nc-bg: #080a0f;
+    --nc-surface: #11151d;
+    --nc-surface-raised: #181e28;
+    --nc-border: #2a3342;
+    --nc-text: #f4f7fb;
+    --nc-text-muted: #a8b3c3;
+    --nc-command: #56e6b1;
+    --nc-command-strong: #2fcf98;
+    --nc-warning: #f3bd61;
+    --nc-danger: #ff7474;
+    --nc-focus: #89a7ff;
+    --r-sm: 0.5rem; --r-md: 0.75rem; --r-lg: 1rem;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--nc-bg); color: var(--nc-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 14px; -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-decoration: none; }
+  ::selection { background: var(--nc-command); color: var(--nc-bg); }
+
+  .app { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+
+  /* Sidebar */
+  .sidebar {
+    background: var(--nc-surface); border-right: 1px solid var(--nc-border);
+    display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 0.6rem; padding: 1.25rem 1.25rem;
+    font-weight: 700; font-size: 1.05rem; border-bottom: 1px solid var(--nc-border);
+  }
+  .brand .mark {
+    width: 28px; height: 28px; border-radius: 7px;
+    background: linear-gradient(135deg, var(--nc-command), var(--nc-command-strong));
+    display: grid; place-items: center; color: var(--nc-bg); font-weight: 800;
+    box-shadow: 0 0 18px rgba(86,230,177,0.35);
+  }
+  .ws-switch {
+    margin: 0.9rem; padding: 0.7rem 0.85rem; border: 1px solid var(--nc-border);
+    border-radius: var(--r-sm); background: var(--nc-surface-raised);
+    display: flex; align-items: center; justify-content: space-between; cursor: pointer;
+    font-size: 0.82rem;
+  }
+  .ws-switch small { color: var(--nc-text-muted); display:block; font-size:0.7rem; }
+  .nav { padding: 0.4rem 0.6rem; flex: 1; overflow-y: auto; }
+  .nav-group { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--nc-text-muted); padding: 0.9rem 0.65rem 0.4rem; }
+  .nav a {
+    display: flex; align-items: center; gap: 0.7rem; padding: 0.55rem 0.65rem;
+    border-radius: var(--r-sm); color: var(--nc-text-muted); font-size: 0.88rem;
+    margin-bottom: 2px; transition: all 0.15s;
+  }
+  .nav a:hover { background: var(--nc-surface-raised); color: var(--nc-text); }
+  .nav a.active { background: rgba(86,230,177,0.1); color: var(--nc-command); }
+  .nav a .ico { width: 16px; text-align: center; font-size: 0.95rem; }
+  .nav a .count { margin-left: auto; font-size: 0.7rem; background: var(--nc-surface-raised); padding: 0.1rem 0.45rem; border-radius: 100px; }
+  .nav a.active .count { background: rgba(86,230,177,0.2); color: var(--nc-command); }
+  .user {
+    padding: 0.9rem; border-top: 1px solid var(--nc-border);
+    display: flex; align-items: center; gap: 0.65rem; font-size: 0.82rem;
+  }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg,var(--nc-focus),var(--nc-command)); display:grid; place-items:center; color: var(--nc-bg); font-weight: 700; }
+  .user small { color: var(--nc-text-muted); display: block; font-size: 0.72rem; }
+
+  /* Main */
+  .main { display: flex; flex-direction: column; min-width: 0; }
+  .topbar {
+    height: 60px; border-bottom: 1px solid var(--nc-border);
+    display: flex; align-items: center; gap: 1rem; padding: 0 1.5rem;
+    position: sticky; top: 0; background: rgba(8,10,15,0.85); backdrop-filter: blur(12px); z-index: 20;
+  }
+  .search {
+    flex: 1; max-width: 440px; display: flex; align-items: center; gap: 0.6rem;
+    background: var(--nc-surface); border: 1px solid var(--nc-border);
+    border-radius: var(--r-sm); padding: 0.5rem 0.85rem; color: var(--nc-text-muted); font-size: 0.85rem;
+  }
+  .search input { background: none; border: none; color: var(--nc-text); flex: 1; outline: none; font-size: 0.85rem; }
+  .topbar .spacer { flex: 1; }
+  .icon-btn {
+    width: 36px; height: 36px; border-radius: var(--r-sm); border: 1px solid var(--nc-border);
+    background: var(--nc-surface); display: grid; place-items: center; cursor: pointer; position: relative;
+  }
+  .icon-btn:hover { border-color: var(--nc-command); }
+  .icon-btn .dot { position: absolute; top: 7px; right: 8px; width: 7px; height: 7px; border-radius: 50%; background: var(--nc-danger); }
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.55rem 1rem;
+    border-radius: var(--r-sm); font-size: 0.85rem; font-weight: 600; cursor: pointer;
+    border: 1px solid transparent; transition: all 0.15s;
+  }
+  .btn-primary { background: var(--nc-command); color: var(--nc-bg); }
+  .btn-primary:hover { background: var(--nc-command-strong); box-shadow: 0 4px 18px rgba(86,230,177,0.35); }
+
+  .content { padding: 1.75rem; flex: 1; }
+  .page-head { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+  .page-head h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; }
+  .page-head p { color: var(--nc-text-muted); font-size: 0.88rem; margin-top: 0.25rem; }
+
+  /* KPI cards */
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+  @media (max-width: 1100px){ .kpis { grid-template-columns: repeat(2,1fr);} }
+  .kpi {
+    background: var(--nc-surface); border: 1px solid var(--nc-border);
+    border-radius: var(--r-md); padding: 1.25rem;
+  }
+  .kpi .label { font-size: 0.78rem; color: var(--nc-text-muted); margin-bottom: 0.5rem; display: flex; align-items:center; gap:0.4rem;}
+  .kpi .val { font-size: 1.7rem; font-weight: 700; letter-spacing: -0.02em; }
+  .kpi .delta { font-size: 0.78rem; margin-top: 0.4rem; display: inline-flex; align-items: center; gap: 0.3rem; }
+  .up { color: var(--nc-command); }
+  .down { color: var(--nc-danger); }
+  .kpi .spark { height: 30px; margin-top: 0.75rem; display: flex; align-items: flex-end; gap: 3px; }
+  .kpi .spark span { flex: 1; background: rgba(86,230,177,0.25); border-radius: 2px 2px 0 0; }
+
+  /* Layout columns */
+  .cols { display: grid; grid-template-columns: 2fr 1fr; gap: 1.25rem; }
+  @media (max-width: 1100px){ .cols { grid-template-columns: 1fr; } }
+
+  .panel { background: var(--nc-surface); border: 1px solid var(--nc-border); border-radius: var(--r-md); overflow: hidden; }
+  .panel-head { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid var(--nc-border); }
+  .panel-head h3 { font-size: 0.98rem; font-weight: 700; }
+  .panel-head a { font-size: 0.8rem; color: var(--nc-command); }
+  .panel-body { padding: 0.75rem; }
+
+  /* Command list */
+  .cmd {
+    display: grid; grid-template-columns: auto 1fr auto; gap: 0.85rem; align-items: center;
+    padding: 0.85rem 0.9rem; border-radius: var(--r-sm); transition: background 0.15s; cursor: pointer;
+  }
+  .cmd:hover { background: var(--nc-surface-raised); }
+  .prio { width: 3px; height: 34px; border-radius: 3px; }
+  .p-critical { background: var(--nc-danger); }
+  .p-high { background: var(--nc-warning); }
+  .p-normal { background: var(--nc-focus); }
+  .cmd .t { font-size: 0.88rem; font-weight: 600; }
+  .cmd .m { font-size: 0.76rem; color: var(--nc-text-muted); margin-top: 0.15rem; }
+  .badge { font-size: 0.7rem; font-weight: 600; padding: 0.25rem 0.6rem; border-radius: 100px; white-space: nowrap; }
+  .b-active { background: rgba(86,230,177,0.14); color: var(--nc-command); }
+  .b-wait { background: rgba(243,189,97,0.14); color: var(--nc-warning); }
+  .b-approve { background: rgba(137,167,255,0.14); color: var(--nc-focus); }
+  .b-blocked { background: rgba(255,116,116,0.14); color: var(--nc-danger); }
+
+  /* Approval queue */
+  .approval { padding: 0.85rem 0.9rem; border-radius: var(--r-sm); border: 1px solid var(--nc-border); margin-bottom: 0.65rem; }
+  .approval .t { font-size: 0.85rem; font-weight: 600; }
+  .approval .m { font-size: 0.74rem; color: var(--nc-text-muted); margin: 0.3rem 0 0.7rem; }
+  .approval .acts { display: flex; gap: 0.5rem; }
+  .mini { font-size: 0.76rem; padding: 0.35rem 0.75rem; border-radius: var(--r-sm); cursor: pointer; font-weight: 600; border: 1px solid var(--nc-border); }
+  .approve { background: rgba(86,230,177,0.15); color: var(--nc-command); border-color: rgba(86,230,177,0.3); }
+  .reject { background: transparent; color: var(--nc-text-muted); }
+  .approve:hover { background: rgba(86,230,177,0.25); }
+  .reject:hover { color: var(--nc-danger); border-color: rgba(255,116,116,0.3); }
+
+  /* Brief */
+  .brief-item { display: flex; gap: 0.7rem; padding: 0.7rem 0.9rem; font-size: 0.82rem; }
+  .brief-item .b-ico { color: var(--nc-command); }
+  .brief-item.warn .b-ico { color: var(--nc-warning); }
+  .brief-item.danger .b-ico { color: var(--nc-danger); }
+  .brief-item span.txt { color: var(--nc-text-muted); }
+  .brief-item strong { color: var(--nc-text); }
+
+  .removing { opacity: 0; transform: translateX(20px); transition: all 0.3s; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand"><span class="mark">N</span> NerdCommand OS</div>
+    <div class="ws-switch">
+      <div><small>Workspace</small>Sparkle Cleaning Co.</div>
+      <span>⌄</span>
+    </div>
+    <nav class="nav">
+      <div class="nav-group">Command</div>
+      <a class="active"><span class="ico">◱</span> Executive Overview</a>
+      <a><span class="ico">◈</span> My Commands <span class="count">7</span></a>
+      <a><span class="ico">✓</span> Approvals <span class="count">3</span></a>
+      <div class="nav-group">Operations</div>
+      <a><span class="ico">$</span> Revenue</a>
+      <a><span class="ico">◇</span> Clients</a>
+      <a><span class="ico">▤</span> Delivery <span class="count">12</span></a>
+      <a><span class="ico">⟳</span> Processes</a>
+      <div class="nav-group">Platform</div>
+      <a><span class="ico">◫</span> Knowledge</a>
+      <a><span class="ico">✦</span> AI Governance</a>
+      <a><span class="ico">⚙</span> Administration</a>
+    </nav>
+    <div class="user">
+      <div class="avatar">M</div>
+      <div>Marcus C.<small>Owner</small></div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="search">
+        <span>⌕</span><input placeholder="Search Commands, clients, processes…">
+      </div>
+      <div class="spacer"></div>
+      <div class="icon-btn">✦</div>
+      <div class="icon-btn">◔<span class="dot"></span></div>
+      <button class="btn btn-primary">+ Create Command</button>
+    </div>
+
+    <div class="content">
+      <div class="page-head">
+        <div>
+          <h1>Executive Overview</h1>
+          <p>What needs attention now · Tuesday, July 23, 2026</p>
+        </div>
+        <button class="btn btn-primary">Generate Command Brief</button>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpis">
+        <div class="kpi">
+          <div class="label">Recurring Revenue</div>
+          <div class="val">$18,400</div>
+          <div class="delta up">▲ 6.2% vs last week</div>
+          <div class="spark"><span style="height:40%"></span><span style="height:55%"></span><span style="height:45%"></span><span style="height:70%"></span><span style="height:60%"></span><span style="height:85%"></span><span style="height:100%"></span></div>
+        </div>
+        <div class="kpi">
+          <div class="label">Qualified Pipeline</div>
+          <div class="val">$42,100</div>
+          <div class="delta up">▲ 11 open opportunities</div>
+          <div class="spark"><span style="height:50%"></span><span style="height:40%"></span><span style="height:65%"></span><span style="height:55%"></span><span style="height:75%"></span><span style="height:70%"></span><span style="height:90%"></span></div>
+        </div>
+        <div class="kpi">
+          <div class="label">Customer Churn</div>
+          <div class="val">5.0%</div>
+          <div class="delta down">▲ 2.0% — investigating</div>
+          <div class="spark"><span style="height:30%;background:rgba(255,116,116,0.3)"></span><span style="height:30%;background:rgba(255,116,116,0.3)"></span><span style="height:35%;background:rgba(255,116,116,0.3)"></span><span style="height:30%;background:rgba(255,116,116,0.3)"></span><span style="height:45%;background:rgba(255,116,116,0.3)"></span><span style="height:50%;background:rgba(255,116,116,0.3)"></span><span style="height:60%;background:rgba(255,116,116,0.3)"></span></div>
+        </div>
+        <div class="kpi">
+          <div class="label">On-Time Completion</div>
+          <div class="val">94%</div>
+          <div class="delta up">▲ 3% this month</div>
+          <div class="spark"><span style="height:70%"></span><span style="height:75%"></span><span style="height:65%"></span><span style="height:80%"></span><span style="height:85%"></span><span style="height:90%"></span><span style="height:94%"></span></div>
+        </div>
+      </div>
+
+      <!-- COLUMNS -->
+      <div class="cols">
+        <!-- Left: attention queue -->
+        <div class="panel">
+          <div class="panel-head"><h3>Attention Queue</h3><a href="#">View all Commands →</a></div>
+          <div class="panel-body">
+            <div class="cmd">
+              <div class="prio p-critical"></div>
+              <div><div class="t">Payment failed — Riverside Apartments</div><div class="m">Owner: Finance · Recovery Command opened · #C-1039</div></div>
+              <span class="badge b-blocked">Blocked</span>
+            </div>
+            <div class="cmd">
+              <div class="prio p-high"></div>
+              <div><div class="t">Estimate new lead — 4BR home, Maple St</div><div class="m">Owner: Sales · Due today · lead-to-estimate · #C-1042</div></div>
+              <span class="badge b-active">Active</span>
+            </div>
+            <div class="cmd">
+              <div class="prio p-high"></div>
+              <div><div class="t">Investigate churn increase (3%→5%)</div><div class="m">Owner: Success Lead · Due Friday · #C-1050</div></div>
+              <span class="badge b-active">Active</span>
+            </div>
+            <div class="cmd">
+              <div class="prio p-normal"></div>
+              <div><div class="t">Dispatch crew + service checklist</div><div class="m">Owner: Ops · Waiting on booking confirmation · #C-1044</div></div>
+              <span class="badge b-wait">Waiting</span>
+            </div>
+            <div class="cmd">
+              <div class="prio p-normal"></div>
+              <div><div class="t">Request review — Oakwood service complete</div><div class="m">AI-assisted · Evidence attached · #C-1045</div></div>
+              <span class="badge b-active">Active</span>
+            </div>
+            <div class="cmd">
+              <div class="prio p-normal"></div>
+              <div><div class="t">Onboard new crew member — background check</div><div class="m">Owner: Ops · crew-onboarding · #C-1048</div></div>
+              <span class="badge b-wait">Waiting</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right column -->
+        <div style="display:flex; flex-direction:column; gap:1.25rem;">
+          <!-- Approvals -->
+          <div class="panel">
+            <div class="panel-head"><h3>Approvals Waiting</h3><span class="badge b-approve" id="apCount">3</span></div>
+            <div class="panel-body" id="approvals">
+              <div class="approval">
+                <div class="t">15% recurring-plan discount</div>
+                <div class="m">Policy: discounts &gt;10% require owner approval · #C-1043</div>
+                <div class="acts"><button class="mini approve">Approve</button><button class="mini reject">Reject</button></div>
+              </div>
+              <div class="approval">
+                <div class="t">AI-drafted proposal → Maple St</div>
+                <div class="m">AI cannot send without human review · Sales · #C-1046</div>
+                <div class="acts"><button class="mini approve">Approve</button><button class="mini reject">Reject</button></div>
+              </div>
+              <div class="approval">
+                <div class="t">Refund request — cancelled service</div>
+                <div class="m">$120 · Finance · #C-1047</div>
+                <div class="acts"><button class="mini approve">Approve</button><button class="mini reject">Reject</button></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Daily Brief -->
+          <div class="panel">
+            <div class="panel-head"><h3>Daily Command Brief</h3><span style="font-size:0.72rem;color:var(--nc-text-muted)">AI · reviewed</span></div>
+            <div class="panel-body" style="padding:0.35rem;">
+              <div class="brief-item"><span class="b-ico">▲</span><span class="txt"><strong>Revenue up 6.2%</strong> — 3 new recurring plans signed this week.</span></div>
+              <div class="brief-item warn"><span class="b-ico">◈</span><span class="txt"><strong>Churn rose to 5%.</strong> Investigation Command assigned to Success Lead.</span></div>
+              <div class="brief-item danger"><span class="b-ico">✕</span><span class="txt"><strong>1 payment failure</strong> at Riverside — recovery in progress.</span></div>
+              <div class="brief-item"><span class="b-ico">✓</span><span class="txt"><strong>94% on-time</strong> delivery — best month to date.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Approval actions — remove card, decrement count
+  const apCount = document.getElementById('apCount');
+  document.querySelectorAll('.approval .mini').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const card = e.target.closest('.approval');
+      card.classList.add('removing');
+      setTimeout(() => {
+        card.remove();
+        const left = document.querySelectorAll('#approvals .approval').length;
+        apCount.textContent = left;
+        if (left === 0) {
+          document.getElementById('approvals').innerHTML =
+            '<div style="padding:1.5rem;text-align:center;color:var(--nc-text-muted);font-size:0.85rem;">All caught up ✓</div>';
+        }
+      }, 300);
+    });
+  });
+
+  // Nav switching
+  document.querySelectorAll('.nav a').forEach(a => {
+    a.addEventListener('click', () => {
+      document.querySelectorAll('.nav a').forEach(x => x.classList.remove('active'));
+      a.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

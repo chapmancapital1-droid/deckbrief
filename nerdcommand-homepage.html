@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NerdCommand — Build the operating system behind your business</title>
+<style>
+  :root {
+    --nc-bg: #080a0f;
+    --nc-surface: #11151d;
+    --nc-surface-raised: #181e28;
+    --nc-border: #2a3342;
+    --nc-text: #f4f7fb;
+    --nc-text-muted: #a8b3c3;
+    --nc-command: #56e6b1;
+    --nc-command-strong: #2fcf98;
+    --nc-warning: #f3bd61;
+    --nc-danger: #ff7474;
+    --nc-focus: #89a7ff;
+    --nc-radius-sm: 0.5rem;
+    --nc-radius-md: 0.875rem;
+    --nc-radius-lg: 1.25rem;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--nc-bg);
+    color: var(--nc-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  ::selection { background: var(--nc-command); color: var(--nc-bg); }
+
+  /* Background grid */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(42, 51, 66, 0.15) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(42, 51, 66, 0.15) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%);
+  }
+
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; position: relative; z-index: 1; }
+
+  /* Header */
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(8, 10, 15, 0.8);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--nc-border);
+  }
+  .nav {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 68px;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 0.6rem;
+    font-weight: 700; font-size: 1.15rem; letter-spacing: -0.02em;
+  }
+  .logo-mark {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--nc-command), var(--nc-command-strong));
+    display: grid; place-items: center;
+    color: var(--nc-bg); font-weight: 800; font-size: 1rem;
+    box-shadow: 0 0 24px rgba(86, 230, 177, 0.35);
+  }
+  .nav-links { display: flex; gap: 2rem; font-size: 0.9rem; color: var(--nc-text-muted); }
+  .nav-links a:hover { color: var(--nc-text); }
+  .nav-actions { display: flex; gap: 0.75rem; align-items: center; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.6rem 1.1rem; border-radius: var(--nc-radius-sm);
+    font-size: 0.88rem; font-weight: 600; cursor: pointer;
+    border: 1px solid transparent; transition: all 0.18s ease;
+    white-space: nowrap;
+  }
+  .btn-ghost { color: var(--nc-text-muted); }
+  .btn-ghost:hover { color: var(--nc-text); }
+  .btn-outline { border-color: var(--nc-border); color: var(--nc-text); }
+  .btn-outline:hover { border-color: var(--nc-command); color: var(--nc-command); }
+  .btn-primary {
+    background: var(--nc-command); color: var(--nc-bg);
+    box-shadow: 0 0 0 rgba(86, 230, 177, 0);
+  }
+  .btn-primary:hover {
+    background: var(--nc-command-strong);
+    box-shadow: 0 4px 24px rgba(86, 230, 177, 0.4);
+    transform: translateY(-1px);
+  }
+
+  @media (max-width: 860px) { .nav-links { display: none; } }
+
+  /* Hero */
+  .hero { padding: 6rem 0 5rem; text-align: center; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.4rem 0.9rem; border-radius: 100px;
+    border: 1px solid var(--nc-border); background: var(--nc-surface);
+    font-size: 0.78rem; color: var(--nc-text-muted); margin-bottom: 1.75rem;
+  }
+  .pill .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--nc-command); box-shadow: 0 0 8px var(--nc-command);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+  .hero h1 {
+    font-size: clamp(2.2rem, 5.5vw, 4rem);
+    line-height: 1.05; letter-spacing: -0.03em; font-weight: 800;
+    max-width: 900px; margin: 0 auto 1.5rem;
+  }
+  .hero h1 .accent {
+    background: linear-gradient(135deg, var(--nc-command), var(--nc-focus));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .hero p {
+    font-size: clamp(1rem, 2vw, 1.2rem); color: var(--nc-text-muted);
+    max-width: 640px; margin: 0 auto 2.5rem;
+  }
+  .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+  .btn-lg { padding: 0.85rem 1.6rem; font-size: 0.95rem; }
+
+  /* Section shared */
+  section.block { padding: 5rem 0; position: relative; z-index: 1; }
+  .eyebrow {
+    color: var(--nc-command); font-size: 0.8rem; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.75rem;
+  }
+  .section-title {
+    font-size: clamp(1.7rem, 3.5vw, 2.6rem); font-weight: 800;
+    letter-spacing: -0.02em; margin-bottom: 1rem; max-width: 640px;
+  }
+  .section-sub { color: var(--nc-text-muted); max-width: 620px; font-size: 1.05rem; }
+
+  /* Flow diagram (command loop) */
+  .flow {
+    margin-top: 3rem;
+    display: flex; align-items: stretch; gap: 0; flex-wrap: wrap;
+    border: 1px solid var(--nc-border); border-radius: var(--nc-radius-lg);
+    overflow: hidden; background: var(--nc-surface);
+  }
+  .flow-step {
+    flex: 1 1 140px; padding: 1.5rem 1.25rem;
+    border-right: 1px solid var(--nc-border); position: relative;
+    transition: background 0.2s;
+  }
+  .flow-step:last-child { border-right: none; }
+  .flow-step:hover { background: var(--nc-surface-raised); }
+  .flow-step .num {
+    font-family: ui-monospace, monospace; font-size: 0.72rem;
+    color: var(--nc-command); margin-bottom: 0.5rem;
+  }
+  .flow-step h4 { font-size: 0.98rem; margin-bottom: 0.35rem; }
+  .flow-step p { font-size: 0.82rem; color: var(--nc-text-muted); }
+
+  /* Cards */
+  .grid { display: grid; gap: 1.25rem; margin-top: 3rem; }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 860px) { .grid-3, .grid-2 { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--nc-surface); border: 1px solid var(--nc-border);
+    border-radius: var(--nc-radius-md); padding: 1.75rem;
+    transition: all 0.2s ease;
+  }
+  .card:hover {
+    border-color: rgba(86, 230, 177, 0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+  }
+  .card .ic {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: var(--nc-surface-raised); display: grid; place-items: center;
+    margin-bottom: 1rem; font-size: 1.2rem; border: 1px solid var(--nc-border);
+  }
+  .card h3 { font-size: 1.1rem; margin-bottom: 0.5rem; }
+  .card p { color: var(--nc-text-muted); font-size: 0.92rem; }
+
+  /* Product families */
+  .prod-card { display: flex; flex-direction: column; }
+  .prod-status {
+    align-self: flex-start; font-size: 0.7rem; font-weight: 700;
+    padding: 0.2rem 0.6rem; border-radius: 100px; letter-spacing: 0.04em;
+    text-transform: uppercase; margin-bottom: 1rem;
+  }
+  .status-beta { background: rgba(243,189,97,0.15); color: var(--nc-warning); border:1px solid rgba(243,189,97,0.3);}
+  .status-planned { background: rgba(137,167,255,0.12); color: var(--nc-focus); border:1px solid rgba(137,167,255,0.3);}
+  .status-ga { background: rgba(86,230,177,0.12); color: var(--nc-command); border:1px solid rgba(86,230,177,0.3);}
+  .prod-card ul { list-style: none; margin-top: 1rem; }
+  .prod-card li {
+    font-size: 0.86rem; color: var(--nc-text-muted); padding: 0.35rem 0;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .prod-card li::before { content: "▸"; color: var(--nc-command); }
+
+  /* Command demo panel */
+  .demo {
+    margin-top: 3rem; background: var(--nc-surface); border: 1px solid var(--nc-border);
+    border-radius: var(--nc-radius-lg); overflow: hidden;
+  }
+  .demo-bar {
+    display: flex; align-items: center; gap: 0.5rem; padding: 0.9rem 1.25rem;
+    border-bottom: 1px solid var(--nc-border); background: var(--nc-surface-raised);
+  }
+  .demo-bar .dots { display: flex; gap: 0.4rem; }
+  .demo-bar .dots span { width: 11px; height: 11px; border-radius: 50%; background: var(--nc-border); }
+  .demo-bar .title { font-family: ui-monospace, monospace; font-size: 0.8rem; color: var(--nc-text-muted); margin-left: 0.5rem; }
+  .demo-body { padding: 1.5rem; display: grid; gap: 0.75rem; }
+  .cmd-row {
+    display: grid; grid-template-columns: 1fr auto auto; gap: 1rem; align-items: center;
+    padding: 0.9rem 1.1rem; background: var(--nc-surface-raised);
+    border: 1px solid var(--nc-border); border-radius: var(--nc-radius-sm);
+    transition: border-color 0.2s;
+  }
+  .cmd-row:hover { border-color: rgba(86,230,177,0.35); }
+  .cmd-title { font-size: 0.9rem; font-weight: 600; }
+  .cmd-meta { font-size: 0.78rem; color: var(--nc-text-muted); }
+  .badge {
+    font-size: 0.72rem; font-weight: 600; padding: 0.25rem 0.6rem;
+    border-radius: 100px; white-space: nowrap;
+  }
+  .b-active { background: rgba(86,230,177,0.14); color: var(--nc-command); }
+  .b-wait { background: rgba(243,189,97,0.14); color: var(--nc-warning); }
+  .b-approve { background: rgba(137,167,255,0.14); color: var(--nc-focus); }
+
+  /* CTA */
+  .cta {
+    margin: 4rem 0; text-align: center; padding: 4rem 2rem;
+    border: 1px solid var(--nc-border); border-radius: var(--nc-radius-lg);
+    background:
+      radial-gradient(ellipse 60% 100% at 50% 0%, rgba(86,230,177,0.08), transparent),
+      var(--nc-surface);
+  }
+  .cta h2 { font-size: clamp(1.7rem, 3.5vw, 2.4rem); font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.02em; }
+  .cta p { color: var(--nc-text-muted); max-width: 500px; margin: 0 auto 2rem; }
+
+  /* Footer */
+  footer { border-top: 1px solid var(--nc-border); padding: 3rem 0 2.5rem; position: relative; z-index: 1; }
+  .foot-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 2rem; }
+  @media (max-width: 860px) { .foot-grid { grid-template-columns: 1fr 1fr; } }
+  .foot-col h5 { font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--nc-text-muted); margin-bottom: 1rem; }
+  .foot-col a { display: block; font-size: 0.88rem; color: var(--nc-text-muted); padding: 0.3rem 0; }
+  .foot-col a:hover { color: var(--nc-command); }
+  .foot-bottom {
+    margin-top: 2.5rem; padding-top: 2rem; border-top: 1px solid var(--nc-border);
+    display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--nc-text-muted); flex-wrap: wrap; gap: 1rem;
+  }
+  .foot-brand { max-width: 280px; }
+  .foot-brand p { font-size: 0.88rem; color: var(--nc-text-muted); margin-top: 0.75rem; }
+
+  .reveal { opacity: 0; transform: translateY(24px); transition: all 0.7s cubic-bezier(0.16,1,0.3,1); }
+  .reveal.in { opacity: 1; transform: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }
+    .pill .dot { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a href="#" class="logo">
+      <span class="logo-mark">N</span> NerdCommand
+    </a>
+    <nav class="nav-links">
+      <a href="#platform">Platform</a>
+      <a href="#foundry">Foundry</a>
+      <a href="#packs">Foundry Packs</a>
+      <a href="#deckbrief">Deckbrief</a>
+    </nav>
+    <div class="nav-actions">
+      <a class="btn btn-ghost" href="#">Login</a>
+      <a class="btn btn-primary" href="#cta">Join the Preview</a>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="wrap hero">
+  <span class="pill"><span class="dot"></span> NerdCommand Platform · Alpha</span>
+  <h1>Build the operating system <br><span class="accent">behind your business.</span></h1>
+  <p>Source-included software, governed AI, reusable workflows, and deployment systems for businesses that need more than disconnected applications.</p>
+  <div class="hero-actions">
+    <a class="btn btn-primary btn-lg" href="#cta">Join the Foundry Preview</a>
+    <a class="btn btn-outline btn-lg" href="#platform">Explore the Architecture →</a>
+  </div>
+</div>
+
+<!-- COMMAND LOOP -->
+<section class="block" id="platform">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="eyebrow">NerdCommand OS</div>
+      <h2 class="section-title">Every signal becomes an accountable Command.</h2>
+      <p class="section-sub">A task says "do something." A Command says: produce this outcome, under this authority, through this process, by this owner, before this deadline, with this evidence.</p>
+    </div>
+    <div class="flow reveal">
+      <div class="flow-step"><div class="num">01 / SENSE</div><h4>Detect</h4><p>A customer, metric, system, or AI detects a signal.</p></div>
+      <div class="flow-step"><div class="num">02 / DECIDE</div><h4>Interpret</h4><p>A person or rule determines the next action.</p></div>
+      <div class="flow-step"><div class="num">03 / AUTHORIZE</div><h4>Check</h4><p>Policies, budgets, and approvals are verified.</p></div>
+      <div class="flow-step"><div class="num">04 / EXECUTE</div><h4>Act</h4><p>A human, workflow, or AI completes the work.</p></div>
+      <div class="flow-step"><div class="num">05 / VERIFY</div><h4>Prove</h4><p>Evidence is collected and outcome confirmed.</p></div>
+      <div class="flow-step"><div class="num">06 / LEARN</div><h4>Improve</h4><p>Results improve future processes.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT A PACK INCLUDES -->
+<section class="block" id="foundry">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="eyebrow">NerdCommand Foundry</div>
+      <h2 class="section-title">From business idea to operating system.</h2>
+      <p class="section-sub">Each Foundry Pack combines six connected layers — not another empty software template.</p>
+    </div>
+    <div class="grid grid-3">
+      <div class="card reveal"><div class="ic">⌘</div><h3>Software System</h3><p>Source code, database, API, admin dashboard, and portals with role-based access.</p></div>
+      <div class="card reveal"><div class="ic">▲</div><h3>Deployment System</h3><p>Docker config, environments, backups, migrations, and monitoring.</p></div>
+      <div class="card reveal"><div class="ic">◇</div><h3>Business Operating Model</h3><p>Value streams, SOPs, approval rules, and an operational scorecard.</p></div>
+      <div class="card reveal"><div class="ic">$</div><h3>Revenue System</h3><p>Offer structure, upsells, retention workflows, and conversion sequences.</p></div>
+      <div class="card reveal"><div class="ic">→</div><h3>Go-to-Market System</h3><p>Website content, launch checklist, templates, and attribution plan.</p></div>
+      <div class="card reveal"><div class="ic">✦</div><h3>AI Operations</h3><p>Governed agents with documented permissions and human approval gates.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- LIVE COMMAND DEMO -->
+<section class="block">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="eyebrow">Executive Command Center</div>
+      <h2 class="section-title">Watch the work move.</h2>
+      <p class="section-sub">A realistic slice of a residential cleaning operation running under command.</p>
+    </div>
+    <div class="demo reveal">
+      <div class="demo-bar">
+        <div class="dots"><span></span><span></span><span></span></div>
+        <span class="title">command-center / delivery</span>
+      </div>
+      <div class="demo-body">
+        <div class="cmd-row">
+          <div><div class="cmd-title">Estimate new lead — 4BR home, Maple St</div><div class="cmd-meta">Owner: Sales · Due today · Process: lead-to-estimate</div></div>
+          <span class="badge b-active">Active</span>
+          <span class="cmd-meta">#C-1042</span>
+        </div>
+        <div class="cmd-row">
+          <div><div class="cmd-title">Approve 15% recurring-plan discount</div><div class="cmd-meta">Owner: Owner · Policy: discounts &gt;10% need approval</div></div>
+          <span class="badge b-approve">Awaiting Approval</span>
+          <span class="cmd-meta">#C-1043</span>
+        </div>
+        <div class="cmd-row">
+          <div><div class="cmd-title">Dispatch crew + service checklist</div><div class="cmd-meta">Owner: Ops · Blocked on booking confirmation</div></div>
+          <span class="badge b-wait">Waiting</span>
+          <span class="cmd-meta">#C-1044</span>
+        </div>
+        <div class="cmd-row">
+          <div><div class="cmd-title">Request review after service complete</div><div class="cmd-meta">AI-assisted · Evidence: before/after photos attached</div></div>
+          <span class="badge b-active">Active</span>
+          <span class="cmd-meta">#C-1045</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCT FAMILIES -->
+<section class="block" id="packs">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="eyebrow">Foundry Packs</div>
+      <h2 class="section-title">Operating systems for real businesses.</h2>
+      <p class="section-sub">Built from one shared core. Each vertical is specific to its customer.</p>
+    </div>
+    <div class="grid grid-3">
+      <div class="card prod-card reveal">
+        <span class="prod-status status-beta">Beta</span>
+        <h3>Residential Cleaning OS</h3>
+        <p>The first vertical in the Local Service Company family.</p>
+        <ul><li>Leads &amp; estimates</li><li>Scheduling &amp; recurring plans</li><li>Crew dispatch &amp; checklists</li><li>Payments &amp; reviews</li></ul>
+      </div>
+      <div class="card prod-card reveal">
+        <span class="prod-status status-planned">Planned</span>
+        <h3>Local Service Core</h3>
+        <p>The reusable base powering lawn care, detailing, pressure washing, and more.</p>
+        <ul><li>Service areas &amp; jobs</li><li>Customer portal</li><li>Notifications</li><li>Operations dashboard</li></ul>
+      </div>
+      <div class="card prod-card reveal">
+        <span class="prod-status status-beta">Beta</span>
+        <h3>Deckbrief</h3>
+        <p>Founder &amp; board operations. Turns operational truth into briefings.</p>
+        <ul><li>Metric registry</li><li>AI narrative drafts</li><li>Human approval</li><li>Follow-up Commands</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DECKBRIEF -->
+<section class="block" id="deckbrief">
+  <div class="wrap">
+    <div class="grid grid-2" style="align-items:center;">
+      <div class="reveal">
+        <div class="eyebrow">Deckbrief</div>
+        <h2 class="section-title">Turn operational truth into actionable briefings.</h2>
+        <p class="section-sub">Verified metrics, decisions, and incidents become a reviewed narrative — then follow-up Commands. Not just "AI generates a nice PDF."</p>
+        <div style="margin-top:2rem;">
+          <a class="btn btn-outline btn-lg" href="#cta">See how it works →</a>
+        </div>
+      </div>
+      <div class="demo reveal" style="margin-top:0;">
+        <div class="demo-bar">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span class="title">deckbrief / weekly-operating-review</span>
+        </div>
+        <div class="demo-body">
+          <div class="cmd-row"><div><div class="cmd-title">Recurring revenue</div><div class="cmd-meta">$18,400 · +6.2% vs last week</div></div><span class="badge b-active">Verified</span></div>
+          <div class="cmd-row"><div><div class="cmd-title">Customer churn</div><div class="cmd-meta">3% → 5% · flagged for investigation</div></div><span class="badge b-wait">Attention</span></div>
+          <div class="cmd-row"><div><div class="cmd-title">→ Command created: Investigate churn</div><div class="cmd-meta">Owner: Success Lead · Due Friday</div></div><span class="badge b-approve">Assigned</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="wrap" id="cta">
+  <div class="cta reveal">
+    <h2>Put your business under command.</h2>
+    <p>NerdCommand is in active development. Join the Foundry Preview to follow the build and help shape the first vertical.</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary btn-lg" href="#">Join the Foundry Preview</a>
+      <a class="btn btn-outline btn-lg" href="#platform">Explore the Architecture</a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a href="#" class="logo"><span class="logo-mark">N</span> NerdCommand</a>
+        <p>An AI-enabled business operating-system company. We run on the system we build.</p>
+      </div>
+      <div class="foot-col">
+        <h5>Product</h5>
+        <a href="#platform">NerdCommand OS</a>
+        <a href="#foundry">Foundry</a>
+        <a href="#packs">Foundry Packs</a>
+        <a href="#deckbrief">Deckbrief</a>
+      </div>
+      <div class="foot-col">
+        <h5>Company</h5>
+        <a href="#">About</a>
+        <a href="#">Documentation</a>
+        <a href="#">Release Notes</a>
+        <a href="#">Status</a>
+      </div>
+      <div class="foot-col">
+        <h5>Trust</h5>
+        <a href="#">Security</a>
+        <a href="#">Privacy</a>
+        <a href="#">AI Governance</a>
+        <a href="#">Terms</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 NerdCommand. All rights reserved.</span>
+      <span>Platform v0.1.0-alpha.1</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+
+</body>
+</html>

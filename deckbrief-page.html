@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deckbrief by NerdCommand — Operational truth into actionable briefings</title>
+<style>
+  :root {
+    --nc-bg: #080a0f;
+    --nc-surface: #11151d;
+    --nc-surface-raised: #181e28;
+    --nc-border: #2a3342;
+    --nc-text: #f4f7fb;
+    --nc-text-muted: #a8b3c3;
+    --nc-command: #56e6b1;
+    --nc-command-strong: #2fcf98;
+    --nc-warning: #f3bd61;
+    --nc-danger: #ff7474;
+    --nc-focus: #89a7ff;
+    --r-sm: 0.5rem; --r-md: 0.875rem; --r-lg: 1.25rem;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--nc-bg); color: var(--nc-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-x: hidden;
+  }
+  a { color: inherit; text-decoration: none; }
+  ::selection { background: var(--nc-command); color: var(--nc-bg); }
+
+  body::before {
+    content:""; position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(42,51,66,0.15) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(42,51,66,0.15) 1px, transparent 1px);
+    background-size: 48px 48px; pointer-events: none; z-index: 0;
+    mask-image: radial-gradient(ellipse 80% 55% at 50% 0%, black 40%, transparent 100%);
+  }
+  .wrap { max-width: 1150px; margin: 0 auto; padding: 0 1.5rem; position: relative; z-index: 1; }
+
+  /* Header */
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(8,10,15,0.8); backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--nc-border);
+  }
+  .nav { display: flex; align-items: center; justify-content: space-between; height: 66px; }
+  .logo { display: flex; align-items: center; gap: 0.6rem; font-weight: 700; font-size: 1.1rem; letter-spacing: -0.02em; }
+  .logo-mark {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--nc-focus), var(--nc-command));
+    display: grid; place-items: center; color: var(--nc-bg); font-weight: 800;
+    box-shadow: 0 0 24px rgba(137,167,255,0.35);
+  }
+  .logo small { color: var(--nc-text-muted); font-weight: 500; font-size: 0.75rem; }
+  .nav-links { display: flex; gap: 2rem; font-size: 0.9rem; color: var(--nc-text-muted); }
+  .nav-links a:hover { color: var(--nc-text); }
+  .nav-actions { display: flex; gap: 0.75rem; align-items: center; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.6rem 1.1rem; border-radius: var(--r-sm);
+    font-size: 0.88rem; font-weight: 600; cursor: pointer;
+    border: 1px solid transparent; transition: all 0.18s; white-space: nowrap;
+  }
+  .btn-ghost { color: var(--nc-text-muted); }
+  .btn-ghost:hover { color: var(--nc-text); }
+  .btn-outline { border-color: var(--nc-border); color: var(--nc-text); }
+  .btn-outline:hover { border-color: var(--nc-focus); color: var(--nc-focus); }
+  .btn-primary { background: var(--nc-focus); color: var(--nc-bg); }
+  .btn-primary:hover { filter: brightness(1.1); box-shadow: 0 4px 24px rgba(137,167,255,0.4); transform: translateY(-1px); }
+  @media (max-width: 860px){ .nav-links { display: none; } }
+
+  /* Hero */
+  .hero { padding: 5.5rem 0 4rem; }
+  .hero-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 3rem; align-items: center; }
+  @media (max-width: 940px){ .hero-grid { grid-template-columns: 1fr; } }
+  .pill {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.4rem 0.9rem; border-radius: 100px;
+    border: 1px solid var(--nc-border); background: var(--nc-surface);
+    font-size: 0.78rem; color: var(--nc-text-muted); margin-bottom: 1.5rem;
+  }
+  .pill .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--nc-focus); box-shadow: 0 0 8px var(--nc-focus); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+  .hero h1 { font-size: clamp(2rem, 4.8vw, 3.4rem); line-height: 1.08; letter-spacing: -0.03em; font-weight: 800; margin-bottom: 1.25rem; }
+  .hero h1 .accent { background: linear-gradient(135deg, var(--nc-focus), var(--nc-command)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .hero p { font-size: 1.1rem; color: var(--nc-text-muted); margin-bottom: 2rem; max-width: 520px; }
+  .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .btn-lg { padding: 0.85rem 1.6rem; font-size: 0.95rem; }
+
+  /* Brief mock (hero) */
+  .brief {
+    background: var(--nc-surface); border: 1px solid var(--nc-border);
+    border-radius: var(--r-lg); overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+  }
+  .brief-bar { display: flex; align-items: center; gap: 0.5rem; padding: 0.85rem 1.15rem; border-bottom: 1px solid var(--nc-border); background: var(--nc-surface-raised); }
+  .brief-bar .dots { display: flex; gap: 0.4rem; }
+  .brief-bar .dots span { width: 10px; height: 10px; border-radius: 50%; background: var(--nc-border); }
+  .brief-bar .ttl { font-family: ui-monospace, monospace; font-size: 0.76rem; color: var(--nc-text-muted); margin-left: 0.4rem; }
+  .brief-inner { padding: 1.4rem; }
+  .brief-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.1rem; }
+  .brief-head h4 { font-size: 1rem; }
+  .brief-head small { color: var(--nc-text-muted); font-size: 0.75rem; }
+  .brief-tag { font-size: 0.68rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 100px; background: rgba(86,230,177,0.12); color: var(--nc-command); border: 1px solid rgba(86,230,177,0.25); }
+  .metric-row { display: grid; grid-template-columns: 1fr auto auto; gap: 0.9rem; align-items: center; padding: 0.7rem 0.85rem; background: var(--nc-surface-raised); border: 1px solid var(--nc-border); border-radius: var(--r-sm); margin-bottom: 0.55rem; }
+  .metric-row .mn { font-size: 0.84rem; font-weight: 600; }
+  .metric-row .mv { font-size: 0.84rem; color: var(--nc-text-muted); }
+  .metric-row .badge { font-size: 0.68rem; font-weight: 600; padding: 0.2rem 0.55rem; border-radius: 100px; }
+  .b-ok { background: rgba(86,230,177,0.14); color: var(--nc-command); }
+  .b-warn { background: rgba(243,189,97,0.14); color: var(--nc-warning); }
+  .b-cmd { background: rgba(137,167,255,0.14); color: var(--nc-focus); }
+
+  /* Sections */
+  section.block { padding: 4.5rem 0; }
+  .eyebrow { color: var(--nc-focus); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.75rem; }
+  .section-title { font-size: clamp(1.6rem, 3.2vw, 2.4rem); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 1rem; max-width: 620px; }
+  .section-sub { color: var(--nc-text-muted); max-width: 600px; font-size: 1.03rem; }
+
+  /* Flow */
+  .flow { margin-top: 2.5rem; display: flex; gap: 0; flex-wrap: wrap; border: 1px solid var(--nc-border); border-radius: var(--r-lg); overflow: hidden; background: var(--nc-surface); }
+  .flow-step { flex: 1 1 130px; padding: 1.4rem 1.15rem; border-right: 1px solid var(--nc-border); transition: background 0.2s; }
+  .flow-step:last-child { border-right: none; }
+  .flow-step:hover { background: var(--nc-surface-raised); }
+  .flow-step .n { font-family: ui-monospace, monospace; font-size: 0.7rem; color: var(--nc-focus); margin-bottom: 0.5rem; }
+  .flow-step h4 { font-size: 0.94rem; margin-bottom: 0.3rem; }
+  .flow-step p { font-size: 0.8rem; color: var(--nc-text-muted); }
+
+  /* Cards */
+  .grid { display: grid; gap: 1.25rem; margin-top: 2.5rem; }
+  .grid-3 { grid-template-columns: repeat(3,1fr); }
+  .grid-2 { grid-template-columns: repeat(2,1fr); }
+  @media (max-width: 860px){ .grid-3, .grid-2 { grid-template-columns: 1fr; } }
+  .card { background: var(--nc-surface); border: 1px solid var(--nc-border); border-radius: var(--r-md); padding: 1.6rem; transition: all 0.2s; }
+  .card:hover { border-color: rgba(137,167,255,0.4); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
+  .card .ic { width: 40px; height: 40px; border-radius: 10px; background: var(--nc-surface-raised); display: grid; place-items: center; margin-bottom: 1rem; font-size: 1.15rem; border: 1px solid var(--nc-border); }
+  .card h3 { font-size: 1.05rem; margin-bottom: 0.45rem; }
+  .card p { color: var(--nc-text-muted); font-size: 0.9rem; }
+
+  /* Full sample brief */
+  .sample {
+    margin-top: 2.5rem; background: var(--nc-surface); border: 1px solid var(--nc-border);
+    border-radius: var(--r-lg); overflow: hidden;
+  }
+  .sample-head { padding: 1.5rem 1.75rem; border-bottom: 1px solid var(--nc-border); background: var(--nc-surface-raised); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+  .sample-head h3 { font-size: 1.15rem; }
+  .sample-head small { color: var(--nc-text-muted); font-size: 0.8rem; display: block; margin-top: 0.25rem; }
+  .sample-actions { display: flex; gap: 0.5rem; }
+  .chip { font-size: 0.72rem; padding: 0.3rem 0.7rem; border-radius: var(--r-sm); border: 1px solid var(--nc-border); color: var(--nc-text-muted); cursor: pointer; }
+  .chip:hover { border-color: var(--nc-focus); color: var(--nc-focus); }
+  .sample-body { padding: 1.75rem; }
+  .sample-section { margin-bottom: 1.75rem; }
+  .sample-section:last-child { margin-bottom: 0; }
+  .sample-section h5 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--nc-focus); margin-bottom: 0.85rem; }
+  .narrative { font-size: 0.95rem; color: var(--nc-text); line-height: 1.7; }
+  .narrative .ev { color: var(--nc-focus); border-bottom: 1px dotted rgba(137,167,255,0.5); cursor: help; }
+  .metrics-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.85rem; }
+  @media (max-width: 780px){ .metrics-grid { grid-template-columns: repeat(2,1fr); } }
+  .mcard { background: var(--nc-surface-raised); border: 1px solid var(--nc-border); border-radius: var(--r-sm); padding: 1rem; }
+  .mcard .l { font-size: 0.72rem; color: var(--nc-text-muted); margin-bottom: 0.35rem; }
+  .mcard .v { font-size: 1.3rem; font-weight: 700; }
+  .mcard .d { font-size: 0.72rem; margin-top: 0.25rem; }
+  .up { color: var(--nc-command); } .down { color: var(--nc-danger); }
+  .cmd-created { display: flex; align-items: center; gap: 0.7rem; padding: 0.8rem 1rem; background: rgba(137,167,255,0.06); border: 1px solid rgba(137,167,255,0.2); border-radius: var(--r-sm); margin-bottom: 0.6rem; }
+  .cmd-created .arrow { color: var(--nc-focus); font-weight: 700; }
+  .cmd-created .t { font-size: 0.88rem; font-weight: 600; }
+  .cmd-created .m { font-size: 0.74rem; color: var(--nc-text-muted); }
+  .provenance { margin-top: 1.5rem; padding: 1rem 1.25rem; background: var(--nc-surface-raised); border: 1px solid var(--nc-border); border-radius: var(--r-sm); font-size: 0.8rem; color: var(--nc-text-muted); display: flex; align-items: center; gap: 0.6rem; }
+  .provenance .ok { color: var(--nc-command); }
+
+  /* CTA */
+  .cta { margin: 4rem 0; text-align: center; padding: 3.5rem 2rem; border: 1px solid var(--nc-border); border-radius: var(--r-lg); background: radial-gradient(ellipse 60% 100% at 50% 0%, rgba(137,167,255,0.08), transparent), var(--nc-surface); }
+  .cta h2 { font-size: clamp(1.6rem, 3.2vw, 2.2rem); font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.02em; }
+  .cta p { color: var(--nc-text-muted); max-width: 480px; margin: 0 auto 2rem; }
+
+  footer { border-top: 1px solid var(--nc-border); padding: 2.5rem 0; }
+  .foot { display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; color: var(--nc-text-muted); flex-wrap: wrap; gap: 1rem; }
+  .foot a:hover { color: var(--nc-focus); }
+
+  .reveal { opacity: 0; transform: translateY(24px); transition: all 0.7s cubic-bezier(0.16,1,0.3,1); }
+  .reveal.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce){ .reveal{opacity:1;transform:none;transition:none;} .pill .dot{animation:none;} }
+
+  .tip { position: relative; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a href="#" class="logo"><span class="logo-mark">D</span> Deckbrief <small>by NerdCommand</small></a>
+    <nav class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="#sources">Data sources</a>
+      <a href="#sample">Sample brief</a>
+      <a href="#os">NerdCommand OS</a>
+    </nav>
+    <div class="nav-actions">
+      <a class="btn btn-ghost" href="#">Login</a>
+      <a class="btn btn-primary" href="#cta">Start Free</a>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="wrap hero">
+  <div class="hero-grid">
+    <div class="reveal">
+      <span class="pill"><span class="dot"></span> Founder &amp; Board Operations</span>
+      <h1>Turn operational truth into <span class="accent">actionable briefings.</span></h1>
+      <p>Verified metrics, decisions, and incidents become a reviewed narrative — and then follow-up Commands. Not just "AI generates a nice PDF."</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary btn-lg" href="#cta">Start Free</a>
+        <a class="btn btn-outline btn-lg" href="#sample">See a sample brief →</a>
+      </div>
+    </div>
+
+    <div class="brief reveal">
+      <div class="brief-bar">
+        <div class="dots"><span></span><span></span><span></span></div>
+        <span class="ttl">deckbrief / investor-update</span>
+      </div>
+      <div class="brief-inner">
+        <div class="brief-head">
+          <div><h4>July Investor Update</h4><small>Sparkle Cleaning Co. · Reviewed &amp; approved</small></div>
+          <span class="brief-tag">✓ Approved</span>
+        </div>
+        <div class="metric-row"><span class="mn">Recurring revenue</span><span class="mv">$18,400</span><span class="badge b-ok">+6.2%</span></div>
+        <div class="metric-row"><span class="mn">Active customers</span><span class="mv">147</span><span class="badge b-ok">+9</span></div>
+        <div class="metric-row"><span class="mn">Churn</span><span class="mv">5.0%</span><span class="badge b-warn">+2.0%</span></div>
+        <div class="metric-row"><span class="mn">→ Investigate churn</span><span class="mv">Success Lead</span><span class="badge b-cmd">Command</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section class="block" id="how">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="eyebrow">How it works</div>
+      <h2 class="section-title">Reporting that closes the loop.</h2>
+      <p class="section-sub">A report that finds a problem shouldn't stop at describing it. Deckbrief turns findings into owned work.</p>
+    </div>
+    <div class="flow reveal">
+      <div class="flow-step"><div class="n">01</div><h4>Connect</h4><p>Metrics flow in from NerdCommand OS or manual entry.</p></div>
+      <div class="flow-step"><div class="n">02</div><h4>Snapshot</h4><p>The exact data used is frozen for the reporting period.</p></div>
+      <div class="flow-step"><div class="n">03</div><h4>Draft</h4><p>AI writes a factual narrative through the governed gateway.</p></div>
+      <div class="flow-step"><div class="n">04</div><h4>Review</h4><p>A human checks the facts and approves publication.</p></div>
+      <div class="flow-step"><div class="n">05</div><h4>Distribute</h4><p>Publish as web, PDF, email, or portal.</p></div>
+      <div class="flow-step"><div class="n">06</div><h4>Act</h4><p>Findings become follow-up Commands with owners.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- DATA SOURCES / FEATURES -->
+<section class="block" id="sources">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="eyebrow">Configurable, not hard-coded</div>
+      <h2 class="section-title">One engine, every kind of brief.</h2>
+      <p class="section-sub">Metrics, templates, and audiences are configurable — so the same engine writes a SaaS investor update or a weekly cleaning-company owner report.</p>
+    </div>
+    <div class="grid grid-3">
+      <div class="card reveal"><div class="ic">◎</div><h3>Metric Registry</h3><p>Define any metric — formula, unit, frequency, owner, and source. MRR or crew utilization, your call.</p></div>
+      <div class="card reveal"><div class="ic">▤</div><h3>Brief Templates</h3><p>Audience, required sections, tone, evidence rules, and approval gates per report type.</p></div>
+      <div class="card reveal"><div class="ic">✦</div><h3>Governed AI</h3><p>All drafts route through the AI Gateway — versioned prompts, cost limits, evidence, and human approval.</p></div>
+      <div class="card reveal"><div class="ic">⎘</div><h3>Multi-format Output</h3><p>Web, PDF, email, Markdown, JSON, and portal — from one reviewed source.</p></div>
+      <div class="card reveal"><div class="ic">◷</div><h3>Version History</h3><p>Every brief keeps its data snapshot, AI draft, human edits, and final approval.</p></div>
+      <div class="card reveal"><div class="ic">→</div><h3>Follow-up Commands</h3><p>Turn a flagged metric into an owned Command with a due date and evidence.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- FULL SAMPLE BRIEF -->
+<section class="block" id="sample">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="eyebrow">Sample brief</div>
+      <h2 class="section-title">A weekly operating review.</h2>
+      <p class="section-sub">Every claim is traceable to verified data. Hover a highlighted phrase to see its evidence source.</p>
+    </div>
+
+    <div class="sample reveal">
+      <div class="sample-head">
+        <div>
+          <h3>Weekly Operating Review — Week 30</h3>
+          <small>Sparkle Cleaning Co. · Period: Jul 14–20, 2026 · Generated from 342 verified records</small>
+        </div>
+        <div class="sample-actions">
+          <span class="chip">Web</span><span class="chip">PDF</span><span class="chip">Email</span>
+        </div>
+      </div>
+
+      <div class="sample-body">
+        <!-- Metrics -->
+        <div class="sample-section">
+          <h5>Metrics · this period</h5>
+          <div class="metrics-grid">
+            <div class="mcard"><div class="l">Recurring Revenue</div><div class="v">$18,400</div><div class="d up">▲ 6.2%</div></div>
+            <div class="mcard"><div class="l">New Bookings</div><div class="v">23</div><div class="d up">▲ 4</div></div>
+            <div class="mcard"><div class="l">Churn</div><div class="v">5.0%</div><div class="d down">▲ 2.0%</div></div>
+            <div class="mcard"><div class="l">On-Time %</div><div class="v">94%</div><div class="d up">▲ 3%</div></div>
+          </div>
+        </div>
+
+        <!-- Narrative -->
+        <div class="sample-section">
+          <h5>Narrative · AI-drafted, human-approved</h5>
+          <p class="narrative">
+            Recurring revenue rose to <span class="ev tip" title="Source: billing.recurring_revenue · verified Jul 20">$18,400 (+6.2%)</span>,
+            driven by <span class="ev tip" title="Source: crm.opportunities · 3 records">three new recurring plans</span> signed this week.
+            Delivery held strong at <span class="ev tip" title="Source: delivery.on_time_rate · 47 jobs">94% on-time completion</span>, the best week this month.
+            The main concern is churn, which climbed from 3% to <span class="ev tip" title="Source: crm.churn · 2 cancellations flagged">5.0%</span> —
+            an investigation is already assigned.
+          </p>
+        </div>
+
+        <!-- Commands created -->
+        <div class="sample-section">
+          <h5>Follow-up Commands · created from this brief</h5>
+          <div class="cmd-created">
+            <span class="arrow">→</span>
+            <div><div class="t">Investigate churn increase (3% → 5%)</div><div class="m">Owner: Success Lead · Due Friday · Evidence: cancellation reasons, cohort analysis · #C-1050</div></div>
+          </div>
+          <div class="cmd-created">
+            <span class="arrow">→</span>
+            <div><div class="t">Confirm 3 recurring plans onboarded correctly</div><div class="m">Owner: Ops · Due Wednesday · #C-1051</div></div>
+          </div>
+        </div>
+
+        <!-- Provenance -->
+        <div class="provenance">
+          <span class="ok">✓</span>
+          <span>Reviewed by <strong style="color:var(--nc-text)">Marcus C. (Owner)</strong> on Jul 21 · Data snapshot frozen · AI draft v3 · 0 unsupported claims flagged</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RELATIONSHIP TO OS -->
+<section class="block" id="os">
+  <div class="wrap">
+    <div class="grid grid-2" style="align-items:center;">
+      <div class="reveal">
+        <div class="eyebrow">Part of the platform</div>
+        <h2 class="section-title">Deckbrief runs on NerdCommand OS.</h2>
+        <p class="section-sub">Use Deckbrief on its own for founder and board reporting — or connect it to NerdCommand OS so briefings draw on verified operational activity instead of hand-entered numbers, and findings flow straight back into governed work.</p>
+        <div style="margin-top:1.75rem; display:flex; gap:1rem; flex-wrap:wrap;">
+          <a class="btn btn-primary btn-lg" href="#cta">Start Free</a>
+          <a class="btn btn-outline btn-lg" href="#">Explore NerdCommand OS →</a>
+        </div>
+      </div>
+      <div class="card reveal" style="padding:1.75rem;">
+        <div style="font-family:ui-monospace,monospace; font-size:0.82rem; color:var(--nc-text-muted); line-height:2;">
+          <div style="color:var(--nc-command)">NerdCommand OS</div>
+          <div>&nbsp;&nbsp;└─ records real activity</div>
+          <div style="color:var(--nc-focus)">Deckbrief</div>
+          <div>&nbsp;&nbsp;├─ detects meaningful change</div>
+          <div>&nbsp;&nbsp;├─ AI prepares narrative</div>
+          <div>&nbsp;&nbsp;├─ human approves</div>
+          <div>&nbsp;&nbsp;└─ distributes brief</div>
+          <div style="color:var(--nc-command)">Commands</div>
+          <div>&nbsp;&nbsp;└─ what happens next</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="wrap" id="cta">
+  <div class="cta reveal">
+    <h2>Stop dreading the update.</h2>
+    <p>Generate your first brief in minutes. Free to start — no earnings promises, no fluff, just clear reporting.</p>
+    <div class="hero-actions" style="justify-content:center;">
+      <a class="btn btn-primary btn-lg" href="#">Start Free</a>
+      <a class="btn btn-outline btn-lg" href="#sample">See the sample again</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap foot">
+    <a href="#" class="logo" style="font-size:0.95rem;"><span class="logo-mark" style="width:24px;height:24px;font-size:0.85rem;">D</span> Deckbrief <small>by NerdCommand</small></a>
+    <span>© 2026 NerdCommand · Deckbrief v0.6.0-beta</span>
+  </div>
+</footer>
+
+<script>
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  document.querySelectorAll('.chip').forEach(c => {
+    c.addEventListener('click', () => {
+      document.querySelectorAll('.chip').forEach(x => x.style.cssText = '');
+      c.style.cssText = 'border-color:var(--nc-focus);color:var(--nc-focus);';
+    });
+  });
+</script>
+</body>
+</html>

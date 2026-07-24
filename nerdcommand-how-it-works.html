@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How It Works — NerdCommand Foundry</title>
+<style>
+  :root {
+    --nc-bg: #080a0f;
+    --nc-surface: #11151d;
+    --nc-surface-raised: #181e28;
+    --nc-border: #2a3342;
+    --nc-text: #f4f7fb;
+    --nc-text-muted: #a8b3c3;
+    --nc-command: #56e6b1;
+    --nc-command-strong: #2fcf98;
+    --nc-warning: #f3bd61;
+    --nc-danger: #ff7474;
+    --nc-focus: #89a7ff;
+    --r-sm: 0.5rem; --r-md: 0.875rem; --r-lg: 1.25rem;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--nc-bg); color: var(--nc-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-x: hidden;
+  }
+  a { color: inherit; text-decoration: none; }
+  ::selection { background: var(--nc-command); color: var(--nc-bg); }
+
+  body::before {
+    content:""; position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(42,51,66,0.15) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(42,51,66,0.15) 1px, transparent 1px);
+    background-size: 48px 48px; pointer-events: none; z-index: 0;
+    mask-image: radial-gradient(ellipse 90% 50% at 50% 0%, black 35%, transparent 100%);
+  }
+  .wrap { max-width: 1150px; margin: 0 auto; padding: 0 1.5rem; position: relative; z-index: 1; }
+
+  /* Header */
+  header { position: sticky; top: 0; z-index: 100; background: rgba(8,10,15,0.8); backdrop-filter: blur(16px); border-bottom: 1px solid var(--nc-border); }
+  .nav { display: flex; align-items: center; justify-content: space-between; height: 66px; }
+  .logo { display: flex; align-items: center; gap: 0.6rem; font-weight: 700; font-size: 1.1rem; letter-spacing: -0.02em; }
+  .logo-mark { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg, var(--nc-command), var(--nc-command-strong)); display: grid; place-items: center; color: var(--nc-bg); font-weight: 800; box-shadow: 0 0 24px rgba(86,230,177,0.35); }
+  .nav-links { display: flex; gap: 2rem; font-size: 0.9rem; color: var(--nc-text-muted); }
+  .nav-links a:hover, .nav-links a.on { color: var(--nc-text); }
+  .nav-actions { display: flex; gap: 0.75rem; align-items: center; }
+  .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.1rem; border-radius: var(--r-sm); font-size: 0.88rem; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: all 0.18s; white-space: nowrap; }
+  .btn-ghost { color: var(--nc-text-muted); } .btn-ghost:hover { color: var(--nc-text); }
+  .btn-outline { border-color: var(--nc-border); color: var(--nc-text); } .btn-outline:hover { border-color: var(--nc-command); color: var(--nc-command); }
+  .btn-primary { background: var(--nc-command); color: var(--nc-bg); } .btn-primary:hover { background: var(--nc-command-strong); box-shadow: 0 4px 24px rgba(86,230,177,0.4); transform: translateY(-1px); }
+  .btn-lg { padding: 0.85rem 1.6rem; font-size: 0.95rem; }
+  @media (max-width: 900px){ .nav-links { display: none; } }
+
+  /* Hero */
+  .hero { padding: 5rem 0 3rem; text-align: center; }
+  .pill { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.9rem; border-radius: 100px; border: 1px solid var(--nc-border); background: var(--nc-surface); font-size: 0.78rem; color: var(--nc-text-muted); margin-bottom: 1.5rem; }
+  .pill .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--nc-command); box-shadow: 0 0 8px var(--nc-command); }
+  .hero h1 { font-size: clamp(2rem, 5vw, 3.6rem); line-height: 1.06; letter-spacing: -0.03em; font-weight: 800; max-width: 780px; margin: 0 auto 1.25rem; }
+  .hero h1 .accent { background: linear-gradient(135deg, var(--nc-command), var(--nc-focus)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .hero p { font-size: 1.1rem; color: var(--nc-text-muted); max-width: 600px; margin: 0 auto; }
+
+  /* Sticky sub-nav */
+  .subnav { position: sticky; top: 66px; z-index: 90; background: rgba(8,10,15,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--nc-border); }
+  .subnav-inner { display: flex; gap: 0.5rem; overflow-x: auto; padding: 0.6rem 0; }
+  .subnav a { font-size: 0.82rem; color: var(--nc-text-muted); padding: 0.4rem 0.85rem; border-radius: var(--r-sm); white-space: nowrap; }
+  .subnav a:hover { color: var(--nc-text); background: var(--nc-surface); }
+  .subnav a.active { color: var(--nc-command); background: rgba(86,230,177,0.1); }
+
+  section.block { padding: 4rem 0; }
+  .eyebrow { color: var(--nc-command); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.75rem; }
+  .section-title { font-size: clamp(1.6rem, 3.2vw, 2.4rem); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 1rem; max-width: 640px; }
+  .section-sub { color: var(--nc-text-muted); max-width: 640px; font-size: 1.03rem; }
+
+  /* THE PIPELINE — vertical stepper */
+  .pipeline { margin-top: 3rem; position: relative; }
+  .pipeline::before {
+    content:""; position: absolute; left: 27px; top: 20px; bottom: 20px; width: 2px;
+    background: linear-gradient(var(--nc-command), var(--nc-focus), var(--nc-border));
+  }
+  @media (max-width: 640px){ .pipeline::before { left: 19px; } }
+  .step { display: grid; grid-template-columns: 56px 1fr; gap: 1.25rem; margin-bottom: 1.25rem; position: relative; }
+  @media (max-width: 640px){ .step { grid-template-columns: 40px 1fr; gap: 0.9rem; } }
+  .step-num {
+    width: 56px; height: 56px; border-radius: 14px; background: var(--nc-surface);
+    border: 1px solid var(--nc-border); display: grid; place-items: center;
+    font-family: ui-monospace, monospace; font-size: 1.1rem; font-weight: 700; color: var(--nc-command);
+    position: relative; z-index: 2;
+  }
+  @media (max-width: 640px){ .step-num { width: 40px; height: 40px; font-size: 0.9rem; border-radius: 11px; } }
+  .step-card { background: var(--nc-surface); border: 1px solid var(--nc-border); border-radius: var(--r-md); padding: 1.4rem 1.6rem; transition: all 0.2s; }
+  .step-card:hover { border-color: rgba(86,230,177,0.4); transform: translateX(4px); }
+  .step-card .role { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--nc-focus); margin-bottom: 0.4rem; }
+  .step-card h3 { font-size: 1.15rem; margin-bottom: 0.5rem; }
+  .step-card p { color: var(--nc-text-muted); font-size: 0.92rem; }
+  .step-card .out { margin-top: 0.85rem; font-size: 0.8rem; color: var(--nc-text-muted); display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.7rem; background: var(--nc-surface-raised); border: 1px solid var(--nc-border); border-radius: 100px; }
+  .step-card .out b { color: var(--nc-command); }
+  .gate { display: grid; grid-template-columns: 56px 1fr; gap: 1.25rem; margin: 1.25rem 0; }
+  @media (max-width: 640px){ .gate { grid-template-columns: 40px 1fr; gap: 0.9rem; } }
+  .gate-mark { width: 56px; display: grid; place-items: center; z-index: 2; }
+  @media (max-width: 640px){ .gate-mark { width: 40px; } }
+  .gate-mark span { width: 36px; height: 36px; border-radius: 50%; background: rgba(243,189,97,0.12); border: 1px solid rgba(243,189,97,0.4); display: grid; place-items: center; color: var(--nc-warning); font-size: 1rem; }
+  .gate-body { display: flex; align-items: center; gap: 0.6rem; padding: 0.75rem 1.25rem; background: rgba(243,189,97,0.06); border: 1px dashed rgba(243,189,97,0.35); border-radius: var(--r-sm); font-size: 0.86rem; color: var(--nc-text-muted); }
+  .gate-body b { color: var(--nc-warning); }
+
+  /* Agents grid */
+  .grid { display: grid; gap: 1.1rem; margin-top: 2.5rem; }
+  .grid-2 { grid-template-columns: repeat(2,1fr); }
+  .grid-3 { grid-template-columns: repeat(3,1fr); }
+  @media (max-width: 860px){ .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+  .card { background: var(--nc-surface); border: 1px solid var(--nc-border); border-radius: var(--r-md); padding: 1.5rem; transition: all 0.2s; }
+  .card:hover { border-color: rgba(86,230,177,0.4); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
+  .card .ic { width: 38px; height: 38px; border-radius: 10px; background: var(--nc-surface-raised); display: grid; place-items: center; margin-bottom: 0.9rem; font-size: 1.1rem; border: 1px solid var(--nc-border); }
+  .card h4 { font-size: 1rem; margin-bottom: 0.35rem; }
+  .card p { color: var(--nc-text-muted); font-size: 0.86rem; }
+  .card .produces { margin-top: 0.75rem; font-size: 0.74rem; color: var(--nc-focus); }
+
+  /* Source vs cloud */
+  .compare { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.1rem; margin-top: 2.5rem; }
+  @media (max-width: 860px){ .compare { grid-template-columns: 1fr; } }
+  .opt { background: var(--nc-surface); border: 1px solid var(--nc-border); border-radius: var(--r-md); padding: 1.75rem; display: flex; flex-direction: column; }
+  .opt.featured { border-color: rgba(86,230,177,0.45); box-shadow: 0 0 40px rgba(86,230,177,0.08); }
+  .opt .tag { align-self: flex-start; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.25rem 0.65rem; border-radius: 100px; background: rgba(86,230,177,0.12); color: var(--nc-command); margin-bottom: 1rem; }
+  .opt h3 { font-size: 1.2rem; margin-bottom: 0.5rem; }
+  .opt > p { color: var(--nc-text-muted); font-size: 0.88rem; margin-bottom: 1.25rem; }
+  .opt ul { list-style: none; margin-top: auto; }
+  .opt li { font-size: 0.85rem; color: var(--nc-text-muted); padding: 0.4rem 0; display: flex; gap: 0.5rem; align-items: flex-start; }
+  .opt li::before { content: "✓"; color: var(--nc-command); flex-shrink: 0; }
+
+  /* Governance callout */
+  .governance { margin-top: 2.5rem; background: var(--nc-surface); border: 1px solid var(--nc-border); border-radius: var(--r-lg); overflow: hidden; }
+  .gov-bar { padding: 0.9rem 1.5rem; border-bottom: 1px solid var(--nc-border); background: var(--nc-surface-raised); font-size: 0.85rem; color: var(--nc-text-muted); display: flex; align-items: center; gap: 0.6rem; }
+  .gov-bar b { color: var(--nc-text); }
+  .gov-body { padding: 1.5rem; display: grid; grid-template-columns: repeat(2,1fr); gap: 1rem; }
+  @media (max-width: 700px){ .gov-body { grid-template-columns: 1fr; } }
+  .gov-item { display: flex; gap: 0.75rem; }
+  .gov-item .k { color: var(--nc-command); flex-shrink: 0; }
+  .gov-item .txt { font-size: 0.86rem; } .gov-item .txt b { display: block; margin-bottom: 0.15rem; }
+  .gov-item .txt span { color: var(--nc-text-muted); font-size: 0.82rem; }
+
+  /* Disclaimer */
+  .note { margin-top: 2rem; padding: 1.1rem 1.4rem; background: var(--nc-surface); border: 1px solid var(--nc-border); border-left: 3px solid var(--nc-warning); border-radius: var(--r-sm); font-size: 0.85rem; color: var(--nc-text-muted); }
+  .note b { color: var(--nc-text); }
+
+  /* CTA */
+  .cta { margin: 4rem 0; text-align: center; padding: 3.5rem 2rem; border: 1px solid var(--nc-border); border-radius: var(--r-lg); background: radial-gradient(ellipse 60% 100% at 50% 0%, rgba(86,230,177,0.08), transparent), var(--nc-surface); }
+  .cta h2 { font-size: clamp(1.6rem, 3.2vw, 2.2rem); font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.02em; }
+  .cta p { color: var(--nc-text-muted); max-width: 480px; margin: 0 auto 2rem; }
+  .cta-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+  footer { border-top: 1px solid var(--nc-border); padding: 2.5rem 0; }
+  .foot { display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; color: var(--nc-text-muted); flex-wrap: wrap; gap: 1rem; }
+  .foot a:hover { color: var(--nc-command); }
+
+  .reveal { opacity: 0; transform: translateY(24px); transition: all 0.6s cubic-bezier(0.16,1,0.3,1); }
+  .reveal.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce){ .reveal{opacity:1;transform:none;transition:none;} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a href="#" class="logo"><span class="logo-mark">N</span> NerdCommand</a>
+    <nav class="nav-links">
+      <a href="#">Platform</a>
+      <a href="#" class="on">Foundry</a>
+      <a href="#">Foundry Packs</a>
+      <a href="#">Deckbrief</a>
+    </nav>
+    <div class="nav-actions">
+      <a class="btn btn-ghost" href="#">Login</a>
+      <a class="btn btn-primary" href="#cta">Join the Preview</a>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="wrap hero">
+  <span class="pill"><span class="dot"></span> NerdCommand Foundry</span>
+  <h1>From a business idea <br>to <span class="accent">an operating system.</span></h1>
+  <p>The Foundry moves every product through the same governed manufacturing pipeline — research, design, assembly, verification, and human-approved release.</p>
+</div>
+
+<!-- SUBNAV -->
+<div class="subnav">
+  <div class="wrap subnav-inner" id="subnav">
+    <a href="#pipeline" class="active">The Pipeline</a>
+    <a href="#agents">The Agents</a>
+    <a href="#genome">Business Genome</a>
+    <a href="#delivery">Source vs Cloud</a>
+    <a href="#governance">Governance</a>
+  </div>
+</div>
+
+<!-- PIPELINE -->
+<section class="block" id="pipeline">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="eyebrow">The Pipeline</div>
+      <h2 class="section-title">Every Foundry Pack is manufactured the same way.</h2>
+      <p class="section-sub">One repeatable process — not one-off custom builds. Each step produces a defined output that feeds the next. Humans hold the release gates.</p>
+    </div>
+
+    <div class="pipeline">
+      <div class="step reveal">
+        <div class="step-num">01</div>
+        <div class="step-card">
+          <div class="role">Business Intent</div>
+          <h3>Describe the business</h3>
+          <p>"Build a residential cleaning company system." The Architect captures intent, industry, and the operating problem to solve.</p>
+          <span class="out">Output: <b>Foundry project + business brief</b></span>
+        </div>
+      </div>
+
+      <div class="step reveal">
+        <div class="step-num">02</div>
+        <div class="step-card">
+          <div class="role">Research</div>
+          <h3>Build the industry dossier</h3>
+          <p>Customers, workflows, competitors, terminology, and risks — with sources — so the system reflects how the business actually runs.</p>
+          <span class="out">Output: <b>Industry dossier</b></span>
+        </div>
+      </div>
+
+      <div class="step reveal">
+        <div class="step-num">03</div>
+        <div class="step-card">
+          <div class="role">Blueprint</div>
+          <h3>Design the operating model</h3>
+          <p>Offers, roles, value streams, revenue model, and metrics become a Business Blueprint the customer can review.</p>
+          <span class="out">Output: <b>Business Blueprint</b></span>
+        </div>
+      </div>
+
+      <div class="step reveal">
+        <div class="step-num">04</div>
+        <div class="step-card">
+          <div class="role">Product Recipe</div>
+          <h3>Resolve the Genome</h3>
+          <p>Required capabilities map to existing, versioned modules. Compatible versions are locked into a reproducible recipe.</p>
+          <span class="out">Output: <b>Product recipe + lockfile</b></span>
+        </div>
+      </div>
+
+      <div class="step reveal">
+        <div class="step-num">05</div>
+        <div class="step-card">
+          <div class="role">Composition</div>
+          <h3>Assemble the repository</h3>
+          <p>Approved modules, vertical overlay, config, and branding generate a reproducible source repository — derived, never copy-pasted.</p>
+          <span class="out">Output: <b>Build candidate</b></span>
+        </div>
+      </div>
+
+      <div class="step reveal">
+        <div class="step-num">06</div>
+        <div class="step-card">
+          <div class="role">Verification</div>
+          <h3>Prove it's production-ready</h3>
+          <p>Tests, security scans, license checks, migrations, SBOM, and provenance. "Production-ready" is a set of passed gates, not a launch.</p>
+          <span class="out">Output: <b>Verification report</b></span>
+        </div>
+      </div>
+
+      <!-- HUMAN GATE -->
+      <div class="gate reveal">
+        <div class="gate-mark"><span>⚑</span></div>
+        <div class="gate-body"><b>Human release gate —</b>&nbsp;product, engineering, security, and licensing sign-off required before anything ships.</div>
+      </div>
+
+      <div class="step reveal">
+        <div class="step-num">07</div>
+        <div class="step-card">
+          <div class="role">Release</div>
+          <h3>Package and version</h3>
+          <p>A signed, versioned release: source package, containers, documentation, and the operating playbook.</p>
+          <span class="out">Output: <b>Approved release artifact</b></span>
+        </div>
+      </div>
+
+      <div class="step reveal">
+        <div class="step-num">08</div>
+        <div class="step-card">
+          <div class="role">Deploy &amp; Learn</div>
+          <h3>Launch and improve</h3>
+          <p>Managed cloud or approved self-hosting. Reliability, adoption, and outcomes flow back and improve the Business Genome.</p>
+          <span class="out">Output: <b>Live system + telemetry</b></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AGENTS -->
+<section class="block" id="agents">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="eyebrow">The Agents</div>
+      <h2 class="section-title">One visible Architect. Specialized workers behind it.</h2>
+      <p class="section-sub">You talk to one intelligence. Behind the scenes, focused agents each do one job and hand off to the next — with humans holding the release gates.</p>
+    </div>
+    <div class="grid grid-3">
+      <div class="card reveal"><div class="ic">◆</div><h4>Architect AI</h4><p>Receives intent, manages the project, routes work, explains decisions.</p><div class="produces">→ Foundry project &amp; brief</div></div>
+      <div class="card reveal"><div class="ic">◎</div><h4>Industry Research</h4><p>Researches customers, workflows, competitors, and risks with sources.</p><div class="produces">→ Industry dossier</div></div>
+      <div class="card reveal"><div class="ic">$</div><h4>Business Model</h4><p>Defines customer, offers, revenue streams, and value proposition.</p><div class="produces">→ Business model spec</div></div>
+      <div class="card reveal"><div class="ic">⚖</div><h4>Compliance Mapper</h4><p>Flags likely permits, tax, insurance, and questions needing pro confirmation.</p><div class="produces">→ Compliance checklist</div></div>
+      <div class="card reveal"><div class="ic">▤</div><h4>Software Planner</h4><p>Converts the model into capabilities, data, workflows, and engineering tasks.</p><div class="produces">→ Product specification</div></div>
+      <div class="card reveal"><div class="ic">◇</div><h4>Genome Resolver</h4><p>Matches required capabilities to existing versioned modules.</p><div class="produces">→ Product recipe</div></div>
+      <div class="card reveal"><div class="ic">⌘</div><h4>Repository Composer</h4><p>Assembles approved modules into a reproducible repository.</p><div class="produces">→ Build candidate</div></div>
+      <div class="card reveal"><div class="ic">✓</div><h4>Security &amp; QA</h4><p>Runs tests, scans, dependency and license checks, threat analysis.</p><div class="produces">→ Verification report</div></div>
+      <div class="card reveal"><div class="ic">⚑</div><h4>Release Manager</h4><p>Confirms all gates and creates the signed, versioned release.</p><div class="produces">→ Approved release</div></div>
+    </div>
+    <div class="note reveal">
+      <b>These are AI agents, not autonomous employees.</b> Every agent has a registered identity, a human owner, approved data and tools, cost limits, and an activity log. High-impact actions — pricing, payments, security changes, releases — always require human approval.
+    </div>
+  </div>
+</section>
+
+<!-- BUSINESS GENOME -->
+<section class="block" id="genome">
+  <div class="wrap">
+    <div class="grid grid-2" style="align-items:center;">
+      <div class="reveal">
+        <div class="eyebrow">The Business Genome</div>
+        <h2 class="section-title">Why the tenth product is mostly assembly.</h2>
+        <p class="section-sub">Every reusable capability is a governed module — with data, API, permissions, events, tests, docs, and an upgrade path. Products are <b style="color:var(--nc-text)">derived from a manifest</b>, not copied. That means a security fix reaches every product, and customers can be updated safely.</p>
+        <div class="note" style="margin-top:1.5rem; border-left-color: var(--nc-command);">
+          <b>Not a copy machine.</b> "Need login? Copy it" creates fork hell. The Composer reads a recipe, resolves compatible versions, and records exactly what shipped — so updates stay possible.
+        </div>
+      </div>
+      <div class="card reveal" style="padding:1.6rem;">
+        <div style="font-family:ui-monospace,monospace; font-size:0.8rem; color:var(--nc-text-muted); line-height:1.9;">
+          <div style="color:var(--nc-command)">business.genome.yaml</div>
+          <div>&nbsp;</div>
+          <div><span style="color:var(--nc-focus)">family:</span> local-service-company</div>
+          <div><span style="color:var(--nc-focus)">vertical:</span> residential-cleaning</div>
+          <div>&nbsp;</div>
+          <div><span style="color:var(--nc-focus)">capabilities:</span></div>
+          <div>&nbsp;&nbsp;- identity@1.0</div>
+          <div>&nbsp;&nbsp;- crm@1.2</div>
+          <div>&nbsp;&nbsp;- scheduling@1.3</div>
+          <div>&nbsp;&nbsp;- recurring-services@1.0</div>
+          <div>&nbsp;&nbsp;- payments@1.2</div>
+          <div>&nbsp;&nbsp;- reviews@1.0</div>
+          <div>&nbsp;</div>
+          <div><span style="color:var(--nc-focus)">deployment:</span></div>
+          <div>&nbsp;&nbsp;mode: managed-cloud</div>
+          <div>&nbsp;&nbsp;isolation: single-tenant</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOURCE VS CLOUD -->
+<section class="block" id="delivery">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="eyebrow">Delivery</div>
+      <h2 class="section-title">Own the source. Or let us run it.</h2>
+      <p class="section-sub">You keep perpetual rights to the version you purchase. Recurring payment covers hosting, AI, updates, and support.</p>
+    </div>
+    <div class="compare">
+      <div class="opt reveal">
+        <span class="tag" style="background:rgba(137,167,255,0.12);color:var(--nc-focus)">One-time</span>
+        <h3>Source License</h3>
+        <p>A versioned source snapshot and deployment rights for your business.</p>
+        <ul>
+          <li>Complete source code</li>
+          <li>Deployment rights per agreement</li>
+          <li>Core documentation</li>
+          <li>Keep it even if services end</li>
+        </ul>
+      </div>
+      <div class="opt featured reveal">
+        <span class="tag">Recurring · Recommended</span>
+        <h3>NerdCommand Cloud</h3>
+        <p>We host, monitor, back up, update, and support the platform.</p>
+        <ul>
+          <li>Managed hosting &amp; backups</li>
+          <li>Security &amp; platform updates</li>
+          <li>AI, email &amp; SMS infrastructure</li>
+          <li>Support &amp; managed integrations</li>
+        </ul>
+      </div>
+      <div class="opt reveal">
+        <span class="tag" style="background:rgba(243,189,97,0.12);color:var(--nc-warning)">Contracted</span>
+        <h3>Enterprise</h3>
+        <p>Dedicated environments, private modules, and custom governance.</p>
+        <ul>
+          <li>Broader deployment rights</li>
+          <li>Private modules &amp; dedicated env</li>
+          <li>Security &amp; architecture reviews</li>
+          <li>Service-level commitments</li>
+        </ul>
+      </div>
+    </div>
+    <div class="note reveal">
+      <b>NerdCommand sells software and operating tools — not guaranteed income.</b> A Foundry Pack gives you a serious operating platform designed around how your kind of business works. You run the business. Business formation, permits, insurance, and licensing vary by location; we provide checklists and referrals, not legal authorization.
+    </div>
+  </div>
+</section>
+
+<!-- GOVERNANCE -->
+<section class="block" id="governance">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="eyebrow">Governance</div>
+      <h2 class="section-title">Controlled AI, at every step.</h2>
+      <p class="section-sub">The pipeline runs on the same rules NerdCommand uses internally. Nothing important happens without an accountable human.</p>
+    </div>
+    <div class="governance reveal">
+      <div class="gov-bar">✦ <b>Every AI action is attributable, permissioned, measurable, and auditable.</b></div>
+      <div class="gov-body">
+        <div class="gov-item"><span class="k">◆</span><div class="txt"><b>Identity &amp; owner</b><span>Each agent has a registered identity and one accountable human owner.</span></div></div>
+        <div class="gov-item"><span class="k">◇</span><div class="txt"><b>Scoped access</b><span>Approved models, data, and tools only. Prohibited actions are blocked.</span></div></div>
+        <div class="gov-item"><span class="k">⚑</span><div class="txt"><b>Human release gates</b><span>Pricing, payments, security, and releases require explicit approval.</span></div></div>
+        <div class="gov-item"><span class="k">◷</span><div class="txt"><b>Full history</b><span>Prompts, cost, evidence, and outcomes are versioned and logged.</span></div></div>
+        <div class="gov-item"><span class="k">✓</span><div class="txt"><b>Evidence required</b><span>Generated claims must trace to verified records, not guesses.</span></div></div>
+        <div class="gov-item"><span class="k">⏻</span><div class="txt"><b>Kill switch</b><span>Any agent can be disabled instantly, with an escalation path.</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="wrap" id="cta">
+  <div class="cta reveal">
+    <h2>See the Foundry in action.</h2>
+    <p>NerdCommand is in active development. Join the Foundry Preview to follow the build and help shape the first vertical.</p>
+    <div class="cta-actions">
+      <a class="btn btn-primary btn-lg" href="#">Join the Foundry Preview</a>
+      <a class="btn btn-outline btn-lg" href="#">Explore Foundry Packs →</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap foot">
+    <a href="#" class="logo" style="font-size:0.95rem;"><span class="logo-mark" style="width:24px;height:24px;font-size:0.85rem;">N</span> NerdCommand</a>
+    <span>© 2026 NerdCommand · Foundry pipeline v0.8.0</span>
+  </div>
+</footer>
+
+<script>
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // Sub-nav active state on scroll
+  const links = [...document.querySelectorAll('#subnav a')];
+  const sections = links.map(a => document.querySelector(a.getAttribute('href')));
+  const spy = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const i = sections.indexOf(e.target);
+        if (i > -1) links[i].classList.add('active');
+      }
+    });
+  }, { rootMargin: '-40% 0px -55% 0px' });
+  sections.forEach(s => s && spy.observe(s));
+</script>
+</body>
+</html>

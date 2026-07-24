@@ -1,0 +1,139 @@
+NCI GODMODE v2 STRATEGY RULES
+Target: MT4 / MQL4 / AI-validated NCI trading brain
+Purpose: catch pips while keeping the trader alive. Survival first, profits second.
+
+NON-NEGOTIABLE PRINCIPLE
+The EA may propose trades, but the AI/dashboard may only validate or reject those proposals. AI must not invent trades from a market snapshot. If data is missing, stale, contradictory, or unclear, reject.
+
+SYSTEM MODE
+0 = AUTO: let market regime select scalp-style or swing-style thresholds.
+1 = SCALP: short-term London/NY execution, stricter spread and candle math.
+2 = SWING: higher-timeframe alignment, larger RR, fewer trades.
+
+RAW NCI SCORE
+Keep the original 12-voter NCI score because it is useful for continuity:
+1 DMA high/low
+2 Stochastic
+3 DMA slope
+4 RSI/AEXD divergence
+5 Candle pattern
+6 ATR
+7 HTF trend
+8 Robotrick
+9 Tick-volume activity
+10 RSI slope
+11 MACD
+12 Day-range pattern
+
+GODMODE WEIGHTED SCORE
+A trade must pass the old raw NCI score and the new weighted score. The weighted score fixes the old problem that noisy single-bar voters had the same power as higher-timeframe trend.
+
+Weights:
+H4 EMA200 hard-direction filter: +20
+MTF stack M15/H1/H4: +15
+HTF trend: +15
+ADX regime: +10
+DMA location/break: +10
+MACD momentum/cross: +10
+Candle math: +10
+Volume/spike validation: +8
+ATR and ATR/spread validation: +8
+Stochastic: +5
+RSI slope: +3
+Day range: +6
+Order block reaction: +10
+VWAP direction: +5 optional, disabled by default because MT4 spot FX uses tick volume.
+
+Default thresholds:
+Scalp minimum weighted score: 85
+Swing minimum weighted score: 105
+Minimum weighted gap between chosen side and opposite side: 12
+Raw NCI minimum score: 8 of 12 minimum for data gathering, tighten to 9-10 after forward data.
+
+HARD REJECTION GATES
+Reject if any of these are true:
+- Outside allowed session.
+- Weekend or Friday disabled when Friday skip is on.
+- Spread is above max.
+- ATR/spread ratio is weak.
+- ATR is below pair-adaptive minimum.
+- ADX is below chop threshold.
+- H4 EMA200 direction disagrees with trade direction.
+- MTF stack fails for direction.
+- Candle math fails.
+- Exhaustion candle blocks the trade.
+- Breakout requirement fails when enabled.
+- Reward/risk below mode minimum.
+- Daily loss kill switch triggered.
+- Weekly loss kill switch triggered.
+- Max trades per day reached.
+- Consecutive loss cooldown triggered.
+- News blackout is active in the controller/dashboard.
+- AI validation does not return approved=true from both Ollama and Claude.
+- Human/dashboard approval is missing.
+
+CANDLE MATH
+A candle pattern is not valid unless the candle has measurable body and location. This fixes the old bug where a 0.1-pip body could count as a pin bar.
+Required by default:
+- Minimum signal body: 0.8 pips
+- Minimum signal range: 2.5 pips
+- Minimum body percentage of full candle range: 22%
+- Buy close must be near top of candle; sell close must be near bottom.
+- Reject oversized signal candles above 1.8x ATR.
+- Reject opposite wick exhaustion.
+
+VOLUME POLICY
+MT4 forex volume is tick volume, not centralized real exchange volume. Use volume as an activity/liquidity filter, not as proof of institutional buying or selling.
+Preferred volume confirmation:
+- Volume ratio above lookback average.
+- Optional z-score for spikes.
+- Never approve volume-only trades.
+
+SCALPING MODEL
+Use only in liquid sessions, preferably London/NY overlap.
+Requirements:
+- Strong weighted score.
+- Tight spread.
+- ATR/spread ratio passes.
+- Candle math passes.
+- MACD momentum supports direction.
+- Volume/activity confirms.
+- RR minimum: 1.20, but prefer 1.50+.
+- Small risk per trade, default 0.25% max.
+
+SWING MODEL
+Use when H4/H1 direction is clear.
+Requirements:
+- H4 EMA200 direction must agree.
+- MTF stack must agree.
+- ADX should not be chop.
+- Entry should occur near level/order-block/retest rather than middle of nowhere.
+- RR minimum: 1.80, prefer 2.00+.
+- Fewer trades, wider stops, more patience.
+
+PROFIT PROTECTION
+Default management is staged:
+Stage 1: move stop to breakeven after BE trigger.
+Stage 2: after profit reaches Stage2ProfitPips, use ATR trail.
+Stage 3: after profit reaches Stage3ProfitPips, use chandelier-style trail.
+Never widen a stop. Never grid. Never martingale. Never average down.
+
+ACCOUNT SURVIVAL RULES
+Default max risk per trade: 0.25%.
+Max daily loss: 1.0%.
+Max weekly loss: 3.0%.
+Max trades per day: 5.
+Max consecutive losses: 3.
+Max one trade per symbol/magic unless manually changed after testing.
+
+AI VALIDATOR RULES
+Ollama and Claude must return strict JSON only. They validate the EA proposal, not raw-market fantasies. Approval requires:
+- Proposal action is BUY or SELL.
+- Proposal is current and not expired.
+- Blockers are empty.
+- Symbol, timeframe, magic, SL, TP, RR, spread and risk match rules.
+- The GodMode weighted score and raw NCI score meet thresholds.
+- Risk and live-trading flags are correct.
+
+TESTING RULE
+The included logic harness only tests decision gates. It is not a market backtest. Before live trading, run MT4 Strategy Tester and forward demo with broker spreads, slippage, news blackout, and real execution logs.
